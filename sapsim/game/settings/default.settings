@@ -1,0 +1,41 @@
+{
+    "game": {
+        "wins_needed": 10,
+        "starting_lives": 10,
+
+        "staging_zone_size": 5,
+        "item_zone_size": [
+            1, 1, 2
+        ],
+        "mon_zone_size": [
+            3, 3, 3, 3,
+            4, 4, 4, 4,
+            5
+        ]
+    },
+    "mons": [
+        {
+            "name": "nestor",
+            "hp": 1,
+            "atk": 1,
+            "ability": null,
+            "item": null
+        },
+        {
+            "name": "chester",
+            "hp": 2,
+            "atk": 1,
+            "ability": null,
+            "item": null
+        }
+    ],
+    "items": [
+        {
+            "name": "apple",
+            "effect": {
+                "hp": 1,
+                "atk": 1
+            }
+        }
+    ]
+}
