@@ -32,6 +32,11 @@ class State():
         if self.currstate == State.Loading:
             self.currstate = State.In_turn
 
+    def buy_mon(self, num):
+        idx = num - 1
+        if not self.mons.valid_idx(idx):
+            raise ValueError()
+
     def buy_output(self):
         ret = []
         ret.append(self.shop.buy_output())

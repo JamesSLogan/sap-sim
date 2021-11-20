@@ -23,6 +23,13 @@ class Zone():
                 return False
         return True
 
+    def valid_idx(self, idx):
+        if idx < 0 or idx >= len(self.pool):
+            return False
+        if self.pool[idx] is None
+            return False
+        return True
+
     # places item in first empty slot
     def append(self, new_item):
         for i, item in enumerate(self):

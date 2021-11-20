@@ -29,6 +29,16 @@ def help_buy():
         move <id> <id>            ex: "move 4 1"
     '''))
 
+# Converts user input to what the game expects
+def usernum_to_gamenum(num):
+    try:
+        num = int(num)
+    except:
+        raise RuntimeError
+    return num-1
+
+# TODO: get rid of this api in favor of one that returns individual mons/etc 
+# and lets the user construct their own string
 def prompt_buy(g):
     return g.state.buy_output()
 
@@ -42,17 +52,23 @@ def process_buy(g, text):
     elif cmd == 'buy':
         try:
             location = tokens[1]
-            buyid = tokens[2]
-        except IndexError:
+            buynum = usernum_to_gamenum(tokens[2])
+        except (IndexError, RuntimeError):
             return input_error_msg()
 
-        print('need to implement')
-        return
+        # Convert user-facing input to what the game expects
+        buynum -= 1 
 
         if location == 'mon':
-            return g.buy_mon(buyid)
+            try:
+                return g.buy_mon(buynum)
+            except ValueError:
+                return input_error_msg()
         elif location == 'item':
-            return g.buy_item(buyid)
+            try:
+                return g.buy_item(buynum)
+            except ValueError:
+                return input_error_msg()
         else:
             return input_error_msg()
 
