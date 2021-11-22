@@ -1,5 +1,6 @@
 # A Zone is an object that manages adding and removing items when told to do so.
 # Zones are aware of frozen items.
+# Zones can have their size expanded.
 class Zone():
     def __init__(self, size):
         self.size = size
@@ -17,16 +18,45 @@ class Zone():
     def __setitem__(self, k, v):
         self.items[k] = v
 
+    def __len__(self):
+        return len(self.items)
+
+    def get(self, i):
+        try:
+            return self[i]
+        except IndexError:
+            return None
+
+    def get_all(self):
+        return self.items
+
+    def expand(self, by=1):
+        self.size += by
+
+    # Will raise ValueError if @item is not in @self
+    def remove(self, item):
+        self[self.items.index(item)] = None
+
     def is_full(self):
+        # Account for when size was increased
+        if len(self) < self.size:
+            return False
+
         for item in self:
             if item is None:
+                return False
+        return True
+
+    def is_empty(self):
+        for item in self:
+            if item is not None:
                 return False
         return True
 
     def valid_idx(self, idx):
         if idx < 0 or idx >= len(self.pool):
             return False
-        if self.pool[idx] is None
+        if self.pool[idx] is None:
             return False
         return True
 

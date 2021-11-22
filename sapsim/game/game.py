@@ -1,23 +1,51 @@
 from sapsim.game.settings import settings as sttngs
 from sapsim.game.state import state as mystate
+from sapsim import ai
 
 class Game():
     def __init__(self):
         pass
 
-    #def load(self, fname):
-    #    self.settings = sttngs.Settings(fname=fname)
-    #    return self.settings
-
     def load_default(self):
         self.settings = sttngs.Settings()
         self.state = mystate.State(self.settings)
 
+    # ai version 0
+    def spend_gold(self):
+        ai.spend_gold(self)
+
+    def get_all(self):
+        return self.state.get_all()
+
     def get_state_num(self):
         return self.state.currstate
 
-    def advance_turn(self):
-        self.state.advance_turn()
+    def new_turn(self):
+        self.state.new_turn()
 
-    def buy_mon(self, num):
-        return self.state.buy_mon(num)
+    def end_turn(self):
+        self.state.end_turn()
+
+    def battle(self):
+        self.state.battle()
+
+    def buy_mon(self, shopnum, stagenum):
+        return self.state.buy_mon(shopnum, stagenum)
+
+    def buy_item(self, shopnum, stagenum):
+        return self.state.buy_item(shopnum, stagenum)
+
+    def freeze_mon(self, shopnum):
+        return self.state.freeze_mon(shopnum)
+
+    def unfreeze_mon(self, shopnum):
+        return self.state.unfreeze_mon(shopnum)
+
+    def move(self, src, dest):
+        return self.state.move(src, dest)
+
+    def sell(self, num):
+        return self.state.sell(num)
+
+    def roll(self):
+        return self.state.roll()
