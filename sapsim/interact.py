@@ -7,6 +7,8 @@ from textwrap import dedent
 
 from sapsim.game import game as mygame
 from sapsim.game.state import state as mystate
+from sapsim.game.battle import battle
+from sapsim import ai
 
 black  = '\033[30m'
 red    = '\033[31m'
@@ -54,7 +56,7 @@ def turn_help():
         move <id> <id>            ex: "move 4 1"
         sell <id>                 ex: "sell 1"
         roll
-        done
+        end [turn]
     '''))
 
 # Converts user input to what the game expects
@@ -78,7 +80,7 @@ def gamenum_to_usernum(num):
 # Converts 'None' input to a string suitable for the user.
 def no_none(arg):
     if arg is None:
-        return '_____'
+        return '_' * 6
     else:
         return arg
 
@@ -91,9 +93,9 @@ def numbered_output(array):
 def prompt_buy(g):
     info = g.get_all()
 
-    staging_list = [f'{bold}Your team{clear}:'] + numbered_output(info['staging'])
-    mons_list    = [f'{bold}Animals{clear}:'] + numbered_output(info['mons'])
-    items_list   = [f'{bold}Items{clear}:'] + numbered_output(info['items'])
+    team_list  = [f'{bold}Your team{clear}:'] + numbered_output(info['team'])
+    mons_list  = [f'{bold}Animals{clear}:'] + numbered_output(info['mons'])
+    items_list = [f'{bold}Items{clear}:'] + numbered_output(info['items'])
 
     ret = [
         sep,
@@ -108,7 +110,7 @@ def prompt_buy(g):
         '',
         '\n'.join(items_list),
         '',
-        '\n'.join(staging_list),
+        '\n'.join(team_list),
         '',
     ]
     return '\n'.join(ret)
@@ -205,12 +207,20 @@ def process_end_turn(g):
     g.end_turn()
 
 def process_turn(g, text):
+    ret = {
+        'prompt': True,
+        'turn_done': False,
+    }
     tokens = text.split()
     cmd = tokens[0].lower() # this is safe
 
+    if cmd == 'me':
+        #process_buy(g, ['buy', 'mon', '1', '1'])
+        ai.spend_gold(g)
+
     if cmd == 'h' or cmd == 'help':
         turn_help()
-        return False
+        ret['prompt'] = False
 
     elif cmd == 'buy':
         process_buy(g, tokens)
@@ -227,24 +237,38 @@ def process_turn(g, text):
     elif cmd == 'roll':
         process_roll(g)
 
-    elif cmd == 'done':
+    elif cmd == 'end':
         process_end_turn(g)
+        ret['turn_done'] = True
 
     else:
         input_error_msg('invalid command')
-    return True
+
+    return ret
+
+def game_is_over(g):
+    return g.lives_left() <= 0
+
+def do_battle(g, g2):
+    winner = battle.battle(g.state.team, g2.state.team)
+    if winner is g.state.team:
+        return g
+    elif winner is g2.state.team:
+        return g2
+    else:
+        return winner # None
 
 def _prompt(g):
-    if g.get_state_num() == mystate.State.In_turn:
-        return prompt_buy(g)
+    return prompt_buy(g)
 
 def prompt(g):
     print(_prompt(g))
 
 def process(g, text):
     ret = {
-        'done': False,
         'prompt': True,
+        'turn_done': False,
+        'quit': False,
     }
 
     if not text or text.isspace():
@@ -253,49 +277,75 @@ def process(g, text):
 
     if text.lower() == 'q':
         if True: # remove later
-            ret['done'] = True
+            ret['quit'] = True
             return ret
 
         choice = input_loop(['y', 'n'], 'Are you sure? (y/n): ')
 
         if choice == 'y':
-            ret['done'] = True
+            ret['quit'] = True
             return ret
         elif choice == 'n':
             return ret
 
-    if g.get_state_num() == mystate.State.In_turn:
-        ret['prompt'] = process_turn(g, text)
-        return ret
+    ret.update(process_turn(g, text))
+    return ret
 
 # Sets up a game and lets the user interact with it
 def launch():
+    # initialize user team
     g = mygame.Game()
     g.load_default()
-    g.new_turn()
 
     # initialize AI team
     g2 = mygame.Game()
     g2.load_default()
-    g2.new_turn()
-    g2.spend_gold()
 
+    status = {}
 
-    status = {
-        'done': False,
-        'prompt': True,
-    }
+    while True:
+        g.new_turn()
+        g2.new_turn()
+        ai.spend_gold(g2)
 
-    while not status['done']:
-        if status['prompt']:
-            prompt(g)
+        #
+        # User's turn
+        #
+        while True:
+            if status.get('prompt', True):
+                prompt(g)
 
-        userin = input('Next input (h=help, q=quit): ')
-        status = process(g, userin)
+            userin = input('Next input (h=help, q=quit): ')
+            status = process(g, userin)
+            if status['turn_done'] or status['quit']:
+                break
 
-    #print('Store:')
-    #print(g.state.shop.mon_zone)
-    #print(g.state.shop.item_zone)
+        if status['quit']:
+            break
+
+        #
+        # Battle time
+        #
+        winner = do_battle(g, g2)
+
+        if winner is g:
+            g.win()
+            g2.loss()
+        elif winner is g2:
+            g.loss()
+            g2.win()
+        else:
+            g.draw()
+            g2.draw()
+
+        if game_is_over(g):
+            print('Game over: AI won.')
+            break
+        if game_is_over(g2):
+            print('Game over: You won!')
+            break
+
+        #status['turn_done'] = False
 
     #readline.set_completer(rlcompleter.Completer(globals()).complete)
     #readline.parse_and_bind('tab: complete')

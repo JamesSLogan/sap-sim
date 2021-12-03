@@ -1,14 +1,14 @@
 from textwrap import dedent
 
 from sapsim.game.state.zone import Zone
-from sapsim.game.mon import mon
-from sapsim.game.item import item
+from sapsim.game.buyable.mon import Mons
+from sapsim.game.buyable.item import Items
 
 class Shop():
     def __init__(self, settings):
         self.settings = settings
-        self.mons = mon.Mons(settings)
-        self.items = item.Items(settings)
+        self.mons = Mons(settings)
+        self.items = Items(settings)
         self.mon_zone = Zone(settings.mon_zone_size(1))
         self.item_zone = Zone(settings.item_zone_size(1))
 

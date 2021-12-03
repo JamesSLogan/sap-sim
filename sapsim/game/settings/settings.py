@@ -34,8 +34,8 @@ class Settings():
     def starting_lives(self):
         return self.game()['starting_lives']
 
-    def staging_zone_size(self):
-        return self.game()['staging_zone_size']
+    def team_size(self):
+        return self.game()['team_size']
 
     def gold_per_turn(self):
         return self.game()['gold_per_turn']
@@ -47,7 +47,7 @@ class Settings():
         return self.game()['gold_per_roll']
 
     def gold_per_level(self, level):
-        return self.game()['gold_per_level'][level-1] # level start from 1
+        return self.game()['gold_per_level'][level-1] # level starts from 1
 
     def max_level(self):
         return self.game()['max_level']

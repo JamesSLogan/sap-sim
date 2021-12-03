@@ -1,4 +1,4 @@
-from sapsim.game.state.buyable import Buyable
+from sapsim.game.buyable.buyable import Buyable
 
 import random
 
@@ -27,7 +27,7 @@ class Mon(Buyable):
         'name': 'YOUSHOULDNEVERSEETHIS',
         'hp': 1,
         'atk': 1,
-        'ability': None,
+        'effects': None,
         'item': None,
         'exp': 0,
         'level': 1,
@@ -40,20 +40,27 @@ class Mon(Buyable):
             raise RuntimeError('You forgot to specify a mon name.')
 
     def __str__(self):
-        frz = ''
-        if self.frozen:
-            frz = 'FROZEN'
+        frz = 'FROZEN' if self.frozen else ''
+        eff = str(self.effect())+' ' if self.effects else ''
 
-        return f'Lvl{self.level} {self.name}: ({self.atk},{self.hp}) ({self.exp}) {frz}'
+        return f'Lvl{self.level} {self.name}: ({self.atk},{self.hp}) ({self.exp}) {eff}{frz}'
 
+    #def inc_exp(self, inc_stats=False):
     def inc_exp(self):
         if self.level == self.settings.max_level():
             return
+
         self.exp += 1
+
         if self.exp == self.settings.min_exp_per_level(self.level+1):
             self.level += 1
+            # Level up effect
+            #self.effects
 
-        # TODO level up ability
+        #if inc_stats:
+        #    self.hp += 1
+        #    self.atk += 1
+
 
 
     # Returns new mon using both inputs
@@ -65,11 +72,23 @@ class Mon(Buyable):
 
         ret.hp = max(self.hp, other.hp) + 1
         ret.atk = max(self.atk, other.atk) + 1
+        ret.exp = max(self.exp, other.exp)
         if not self.item and other.item:
             ret.item = other.item
         ret.inc_exp()
 
         return ret
+
+    # "effect" is a function of a mon
+    # "effects" is an attribute of a mon
+    def effect(self):
+        try:
+            return self.effects.get_effect(self.level)
+        except AttributeError:
+            return None
+
+    def is_alive(self):
+        return self.hp > 0
 
 class Mons():
     def __init__(self, settings):
@@ -80,6 +99,12 @@ class Mons():
         self.pool = []
         for mon in settings.mons():
             self.pool.append(Mon(mon, settings))
+
+    def get(self, name):
+        for mon in self.pool:
+            if mon.name == name:
+                return Mon(mon, self.settings)
+        return mon
 
     def random(self):
         return Mon(random.choice(self.pool), self.settings)

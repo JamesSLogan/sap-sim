@@ -1,4 +1,4 @@
-from sapsim.game.state.buyable import Buyable
+from sapsim.game.buyable.buyable import Buyable
 
 import random
 

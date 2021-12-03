@@ -10,15 +10,8 @@ class Game():
         self.settings = sttngs.Settings()
         self.state = mystate.State(self.settings)
 
-    # ai version 0
-    def spend_gold(self):
-        ai.spend_gold(self)
-
     def get_all(self):
         return self.state.get_all()
-
-    def get_state_num(self):
-        return self.state.currstate
 
     def new_turn(self):
         self.state.new_turn()
@@ -49,3 +42,15 @@ class Game():
 
     def roll(self):
         return self.state.roll()
+
+    def lives_left(self):
+        return self.state.lives
+
+    def win(self):
+        return self.state.win()
+
+    def loss(self):
+        return self.state.loss()
+
+    def draw(self):
+        return self.state.draw()

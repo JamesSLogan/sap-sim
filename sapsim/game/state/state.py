@@ -1,22 +1,10 @@
-from sapsim.game.state import staging, shop
-from sapsim.game.mon import mon
-from sapsim.game.item import item
+from sapsim.game.state import team, shop
+from sapsim.game.battle.flow import process_sell_effect
 
 class State():
-    Loading    = 0
-    In_turn    = 1
-    End_turn   = 2
-    In_battle  = 3
-    End_battle = 4
-    Over = 5 #needed?
-
     def __init__(self, settings):
         self.settings = settings
-        self.currstate = State.Loading
-
-        self.staging = staging.Staging(settings)
-        #self.mons = mon.Mons(settings)
-        #self.items = item.Items(settings)
+        self.team = team.Team(settings)
         self.shop = shop.Shop(settings)
 
         self.turn_num = 0
@@ -31,29 +19,22 @@ class State():
             'wins': self.wins,
             'lives': self.lives,
         }
-        ret.update({'staging': self.staging.get_all()})
+        ret.update({'team': self.team.get_all()})
         ret.update(self.shop.get_all())
         return ret
 
     def new_turn(self):
         self.turn_num += 1 # ??
-        if self.turn_num > 1:
-            # account for stuff that happened
-            pass
 
         self.gold = self.settings.gold_per_turn()
 
-        #self.shop.refresh(self.mons, self.items) # TODO: pass turn_num so shop knows sizes
-        self.shop.refresh(self.turn_num) # TODO: pass turn_num so shop knows sizes
-
-        if self.currstate == State.Loading:
-            self.currstate = State.In_turn
+        self.shop.refresh(self.turn_num)
 
     def end_turn(self):
         pass
 
-    def battle(self, other):
-        pass
+    #def battle(self, other):
+    #    pass
 
     def buy_mon(self, shopnum, stagenum):
         combine = False
@@ -67,7 +48,7 @@ class State():
         if purchase_mon.price > self.gold:
             raise ValueError('Not enough gold')
 
-        stage_mon = self.staging.get(stagenum)
+        stage_mon = self.team.get(stagenum)
         if stage_mon is not None and stage_mon.name != purchase_mon.name:
             raise ValueError('Invalid placement')
 
@@ -78,7 +59,7 @@ class State():
         # Execute purchase
         self.gold -= purchase_mon.price
         self.shop.remove_mon(save_ref) # shop doesn't contain the combined one
-        self.staging.add(purchase_mon, stagenum, combine)
+        self.team.add(purchase_mon, stagenum, combine)
 
     def buy_item(self, shopnum, stagenum):
         return self.shop.buy_item(num)
@@ -96,26 +77,30 @@ class State():
         self.shop.unfreeze_item(num)
 
     def sell(self, num):
-        if not (mon := self.staging.get(num)):
+        if not (mon := self.team.get(num)):
             raise ValueError('invalid number')
         self.gold += self.settings.gold_per_level(mon.level)
-        self.staging.rm(num)
+        self.team.delete(num)
+
+        effect = mon.effect()
+        if effect and effect.trigger == 'sell':
+            process_sell_effect(self.team, effect)
 
     def move(self, src, dest):
         if src == dest:
             return
 
         try:
-            src_mon = self.staging[src]
+            src_mon = self.team[src]
         except IndexError:
             raise ValueError('Invalid source specified')
         try:
-            dest_mon = self.staging[dest]
+            dest_mon = self.team[dest]
         except IndexError:
             raise ValueError('Invalid destination specified')
 
-        self.staging[src] = dest_mon
-        self.staging[dest] = src_mon
+        self.team[src] = dest_mon
+        self.team[dest] = src_mon
 
     def roll(self):
         gpr = self.settings.gold_per_roll()
@@ -123,3 +108,12 @@ class State():
             raise ValueError('Not enough gold')
         self.gold -= gpr
         self.shop.refresh()
+
+    def win(self):
+        self.wins += 1
+
+    def loss(self):
+        self.lives -= 1
+
+    def draw(self):
+        pass

@@ -1,7 +1,7 @@
 {
     "game": {
         "wins_needed": 10,
-        "starting_lives": 10,
+        "starting_lives": 3,
         "gold_per_turn": 10,
         "gold_per_shop_item": 3,
         "gold_per_roll": 1,
@@ -10,7 +10,7 @@
         "min_exp_per_level": [0, 2, 5],
         "max_level": 3,
 
-        "staging_zone_size": 5,
+        "team_size": 5,
         "item_zone_size": [
             1, 1, 2
         ],
@@ -23,25 +23,131 @@
     "mons": [
         {
             "name": "nestor",
-            "hp": 1,
             "atk": 1,
-            "ability": null,
+            "hp": 5,
             "item": null
         },
         {
             "name": "chester",
-            "hp": 2,
             "atk": 1,
-            "ability": null,
+            "hp": 3,
             "item": null
+        },
+        {
+            "name": "lester",
+            "atk": 2,
+            "hp": 1,
+            "item": null
+        },
+        {
+            "name": "cricket",
+            "atk": 1,
+            "hp": 2,
+            "effects": [
+                {
+                    "description": "Lvl 1: Faint: Summon a 1/1 cricket",
+                    "trigger": "faint",
+                    "effect": "summon_inplace",
+                    "data": {
+                        "name": "cricket",
+                        "atk": 1,
+                        "hp": 1
+                    }
+                },
+                {
+                    "description": "Lvl 2: Faint: Summon a 2/2 cricket",
+                    "trigger": "faint",
+                    "effect": "summon_inplace",
+                    "data": {
+                        "name": "cricket",
+                        "atk": 2,
+                        "hp": 2
+                    }
+                },
+                {
+                    "description": "Lvl 3: Faint: Summon a 3/3 cricket",
+                    "trigger": "faint",
+                    "effect": "summon_inplace",
+                    "data": {
+                        "name": "cricket",
+                        "atk": 3,
+                        "hp": 3
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ant",
+            "atk": 2,
+            "hp": 1,
+            "effects": [
+                {
+                    "description": "Lvl 1: Faint: Give a random friend +2/+1",
+                    "trigger": "faint",
+                    "effect": "buff_random",
+                    "data": {
+                        "atk": 2,
+                        "hp": 1
+                    }
+                },
+                {
+                    "description": "Lvl 2: Faint: Give a random friend +4/+2",
+                    "trigger": "faint",
+                    "effect": "buff_random",
+                    "data": {
+                        "atk": 4,
+                        "hp": 2
+                    }
+                },
+                {
+                    "description": "Lvl 3: Faint: Give a random friend +6/+3",
+                    "trigger": "faint",
+                    "effect": "buff_random",
+                    "data": {
+                        "atk": 6,
+                        "hp": 3
+                    }
+                }
+            ]
+        },
+        {
+            "name": "beaver",
+            "atk": 2,
+            "hp": 2,
+            "effects": [
+                {
+                    "description": "Lvl 1: Sell: Give 2 random friends +1 hp",
+                    "trigger": "sell",
+                    "effect": "buff_random_2",
+                    "data": {
+                        "hp": 1
+                    }
+                },
+                {
+                    "description": "Lvl 2: Sell: Give 2 random friends +2 hp",
+                    "trigger": "sell",
+                    "effect": "buff_random_2",
+                    "data": {
+                        "hp": 2
+                    }
+                },
+                {
+                    "description": "Lvl 3: Sell: Give 2 random friends +3 hp",
+                    "trigger": "sell",
+                    "effect": "buff_random_2",
+                    "data": {
+                        "hp": 3
+                    }
+                }
+            ]
         }
     ],
     "items": [
         {
             "name": "apple",
             "effect": {
-                "hp": 1,
-                "atk": 1
+                "atk": 1,
+                "hp": 1
             }
         }
     ]

@@ -27,6 +27,9 @@ class Zone():
         except IndexError:
             return None
 
+    def index(self, item):
+        return self.items.index(item)
+
     def get_all(self):
         return self.items
 
@@ -35,7 +38,7 @@ class Zone():
 
     # Will raise ValueError if @item is not in @self
     def remove(self, item):
-        self[self.items.index(item)] = None
+        self[self.index(item)] = None
 
     def is_full(self):
         # Account for when size was increased
@@ -51,13 +54,6 @@ class Zone():
         for item in self:
             if item is not None:
                 return False
-        return True
-
-    def valid_idx(self, idx):
-        if idx < 0 or idx >= len(self.pool):
-            return False
-        if self.pool[idx] is None:
-            return False
         return True
 
     # places item in first empty slot
