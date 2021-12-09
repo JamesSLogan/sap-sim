@@ -20,6 +20,7 @@ def get_random_mon(mons):
 def get_random_empty_spot(team):
     return random_null_idx(team)
 
+# hardly works at all
 def spend_gold(g):
     while True:
         info = g.get_all()
